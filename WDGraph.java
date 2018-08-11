@@ -98,7 +98,6 @@ public class WDGraph<V, E> implements IGraph<V, E> {
 
         int shortestDistance;
 
-        IVertex<V> previous = null;
         // While the priority queue is NOT empty
         while (!queue.isEmpty()) {
             // Set current to next most priority vertex
@@ -123,9 +122,11 @@ public class WDGraph<V, E> implements IGraph<V, E> {
              */
             // tempList = List containing edges for the most priority vertex
             LinkedList<IEdge<E>> tempList = graph.get(current);
-
+            IVertex<V> previous = null;
             // Iterate the edges inside the most priority vertex
             for (IEdge<E> neighbor : tempList) {
+
+//                IVertex<V> previous = neighbor.getStartVertex();
 
                 // UpdateCost is current nodes distance + cost to get to iterated neighbor
                 int updatedCost = distanceTable.get(current) + (Integer) neighbor.getCost();
@@ -136,6 +137,30 @@ public class WDGraph<V, E> implements IGraph<V, E> {
                     // Update the cost for that vertex
                     distanceTable.put(neighbor.getEndVertex(), updatedCost);
                     neighbor.getEndVertex().setDistance(updatedCost);
+
+                    //TODO updating the vertex prev of the edge. NOT the prev of the original verticies.
+                    // TODO must go to the main verticies and update the prev there.
+                    //TODO After this, iterate through the verticies prev like in the example.
+                    // TODO Make the end vertex's prev the start vertex.
+                    //current.setPrevious(neighbor.getEndVertex());
+                    IVertex<V> test =  neighbor.getEndVertex();
+                    test.setPrevious(current);
+                    //System.out.println("Current: " + current + " Prev: " + test);
+                    //System.out.println("Start Vertex: " + neighbor.getStartVertex());
+                    //System.out.println("End Vertex: " + neighbor.getEndVertex());
+
+                    Set<IVertex<V>> allVerticies = graph.keySet();
+
+                    for (IVertex<V> vertex : allVerticies)
+                    {
+                        if (vertex == neighbor.getEndVertex())
+                        {
+                            vertex.setPrevious(neighbor.getStartVertex());
+                            //System.out.println("Vertex: " + vertex + " Prev: " + vertex.getPrevious());
+
+                        }
+                    }
+
                 }
 
 
@@ -158,10 +183,37 @@ public class WDGraph<V, E> implements IGraph<V, E> {
             visitedNodes.add(currentName);
 
             previous = current;
-            stack.push(current);
+            //stack.push(current);
+        }
+        shortestDistance = distanceTable.get(end);
+
+        System.out.println("Distance Table: ");
+        System.out.println();
+
+
+        System.out.println("Path from " + start + " to " + end);
+
+        IVertex<V> dest = end;
+
+        while (dest.getPrevious() != null)
+        {
+            //System.out.println("Pushing " + dest);
+            stack.push(dest);
+            dest = dest.getPrevious();
         }
 
-        shortestDistance = distanceTable.get(end);
+        while (!stack.empty())
+        {
+            //System.out.println("Popping " + stack.pop());
+            System.out.print(stack.pop());
+            System.out.println(" ");
+
+        }
+
+/*        for (Map.Entry<IVertex<V>,Integer> entry: distanceTable.entrySet())
+        {
+            System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+        }*/
 
         return shortestDistance;
     }
@@ -232,7 +284,7 @@ public class WDGraph<V, E> implements IGraph<V, E> {
     }
 
     private Map<IVertex<V>, Integer> initMap() {
-        Map<IVertex<V>, Integer> unvisitedNodes = new HashMap<>();
+        Map<IVertex<V>, Integer> unvisitedNodes = new HashMap<IVertex<V>,Integer>();
         for (IVertex<V> vertex : graph.keySet()) {
             unvisitedNodes.put(vertex, Integer.MAX_VALUE);
         }

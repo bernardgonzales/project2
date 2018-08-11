@@ -5,7 +5,19 @@ public class GraphVertex<V extends Comparable<V>> implements IVertex<V>, Compara
     private V name;
     private int distanceFromStart;
     private IVertex<V> last;
+    public IVertex<V> previous;
 
+    @Override
+    public void setPrevious(IVertex<V> prev)
+    {
+        this.previous = prev;
+    }
+
+    public IVertex<V> getPrevious()
+    {
+        return this.previous;
+
+    }
     @Override
     public int getDistance() {
         return distanceFromStart;
